@@ -24,16 +24,21 @@ RUN mkdir -p /steam/SteamCMD && \
     chown -R libre-source:libre-source /steam && \
     chmod -R u+rwX /steam
 
+# Download and extract SteamCMD
+RUN wget -P /steam/SteamCMD/ "$steamcmd_url" && \
+    bsdtar -xf /steam/SteamCMD/steamcmd_linux.tar.gz -C /steam/SteamCMD && \
+    rm /steam/SteamCMD/steamcmd_linux.tar.gz && \
+    chown -R libre-source:libre-source /steam && \
+    chmod -R u+rwX /steam
+
 USER libre-source
 WORKDIR /steam
 
 ###~ Setup SteamCMD
 COPY ./src/install_css /steam/SteamCMD/
-RUN mkdir -p /steam/SteamCMD && \
-    wget -P /steam/SteamCMD/ "$steamcmd_url" && \
-    bsdtar -xf /steam/SteamCMD/steamcmd_linux.tar.gz -C /steam/SteamCMD && \
-    rm /steam/SteamCMD/steamcmd_linux.tar.gz && \
-    bash /steam/SteamCMD/steamcmd.sh +runscript /steam/SteamCMD/install_css
+RUN chmod +x /steam/SteamCMD/install_css
+
+RUN bash /steam/SteamCMD/steamcmd.sh +runscript /steam/SteamCMD/install_css
 
 ###~ Expose Ports
 EXPOSE 27015 27015/udp
