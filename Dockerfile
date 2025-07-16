@@ -31,13 +31,15 @@ RUN wget -P /steam/SteamCMD/ "$steamcmd_url" && \
     chown -R libre-source:libre-source /steam && \
     chmod -R u+rwX /steam
 
+COPY ./src/install_css /steam/SteamCMD/
+
+RUN chmod +x /steam/SteamCMD/install_css && \
+    chown libre-source:libre-source /steam/SteamCMD/install_css
+
 USER libre-source
 WORKDIR /steam
 
 ###~ Setup SteamCMD
-COPY ./src/install_css /steam/SteamCMD/
-RUN chmod +x /steam/SteamCMD/install_css
-
 RUN bash /steam/SteamCMD/steamcmd.sh +runscript /steam/SteamCMD/install_css
 
 ###~ Expose Ports
