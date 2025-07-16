@@ -1,4 +1,4 @@
 login anonymous
-force_install_dir ./libre-css/
+force_install_dir ../libre-css/
 app_update 232330 validate
 quit

@@ -21,7 +21,8 @@ RUN addgroup --gid 1001 libre-source && \
     adduser --uid 1001 --gid 1001 --system --disabled-password libre-source
 
 RUN mkdir -p /steam/SteamCMD && \
-    chown -R libre-source:libre-source /steam
+    chown -R libre-source:libre-source /steam && \
+    chmod -R u+rwX /steam
 
 USER libre-source
 WORKDIR /steam
