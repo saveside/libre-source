@@ -33,7 +33,7 @@ RUN mkdir -p /steam/SteamCMD && \
     wget -P /steam/SteamCMD/ "$steamcmd_url" && \
     bsdtar -xf /steam/SteamCMD/steamcmd_linux.tar.gz -C /steam/SteamCMD && \
     rm /steam/SteamCMD/steamcmd_linux.tar.gz && \
-    sh /steam/SteamCMD/steamcmd.sh +runscript /steam/SteamCMD/install_css
+    bash /steam/SteamCMD/steamcmd.sh +runscript /steam/SteamCMD/install_css
 
 ###~ Expose Ports
 EXPOSE 27015 27015/udp
