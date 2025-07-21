@@ -1,35 +1,61 @@
 ### LibreSource
 FROM debian:bookworm-slim
 
-ARG steamcmd_url="http://media.steampowered.com/installer/steamcmd_linux.tar.gz"
+###################### ARGUMENTS #######################
+ARG steamcmd_url="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
+########################################################
 
-RUN dpkg --add-architecture i386 && apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends wget locales ca-certificates libarchive-tools bash curl:i386 lib32gcc-s1 libstdc++6:i386 && \
-    rm -rf /var/lib/apt/lists/*
+###################### DEPENDENCIES ####################
+RUN dpkg --add-architecture i386 && \
+    apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        wget \
+        locales \
+        ca-certificates \
+        curl:i386 \
+        lib32gcc-s1 \
+        libstdc++6:i386 \
+        libncurses5:i386 \
+        libtinfo5:i386 \
+        bash \
+        xz-utils \
+        unzip \
+        zip \
+    && localedef -i en_US -f UTF-8 en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN addgroup --gid 1001 libre-source && \
-    adduser --uid 1001 --gid 1001 --system --disabled-password --no-create-home libre-source
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+########################################################
 
-RUN mkdir -p /steam/SteamCMD
+######################## USER ##########################
+RUN groupadd -r steam && useradd -r -g steam -m -d /libre-source steam
+########################################################
 
-# Download and extract SteamCMD as root
-RUN wget -P /steam/SteamCMD/ "$steamcmd_url" && \
-    bsdtar -xf /steam/SteamCMD/steamcmd_linux.tar.gz -C /steam/SteamCMD && \
-    rm /steam/SteamCMD/steamcmd_linux.tar.gz
+##################### INSTALL STEAMCMD #################
+USER steam
+WORKDIR /libre-source
+# Download and extract SteamCMD
+COPY ./src/install_css /libre-source
+RUN wget -O steamcmd_linux.tar.gz "$steamcmd_url" && \
+    tar -xzf steamcmd_linux.tar.gz && \
+    rm steamcmd_linux.tar.gz
+########################################################
 
-COPY ./src/install_css /steam/SteamCMD/
-RUN chmod +x /steam/SteamCMD/install_css
+##################### INSTALL CSS SERVER ################
+RUN bash ./steamcmd.sh +runscript ./install_css
+########################################################
 
-# Run SteamCMD install as root (fixes permission issues)
-RUN bash /steam/SteamCMD/steamcmd.sh +runscript /steam/SteamCMD/install_css
+#################### PERMISSIONS #######################
+USER root
+RUN chown -R steam:steam /libre-source
+USER steam
+WORKDIR /libre-source/css
+RUN chmod +x /libre-source/css/srcds_run
+########################################################
 
-# Fix ownership for runtime usage
-RUN chown -R libre-source:libre-source /steam
-
-# Switch to unprivileged user for runtime
-USER libre-source
-WORKDIR /steam
-
-# Expose ports as needed
+#################### RUNTIME SETUP #####################
 EXPOSE 27015 27015/udp
-
+ENTRYPOINT ["/libre-source/css/srcds_run"]
+########################################################
