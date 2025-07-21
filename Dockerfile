@@ -52,7 +52,6 @@ USER root
 RUN chown -R steam:steam /libre-source
 USER steam
 WORKDIR /libre-source/css
-RUN chmod +x /libre-source/css/srcds_run
 ########################################################
 
 #################### RUNTIME SETUP #####################
